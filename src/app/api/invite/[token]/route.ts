@@ -12,6 +12,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { db } from '@/lib/db'
 import { getCurrentUserId, handleAuthError } from '@/lib/auth/workspace'
 
@@ -81,7 +82,7 @@ export async function POST(
       )
     }
 
-    await db.$transaction(async (tx) => {
+    await db.$transaction(async (tx: Prisma.TransactionClient) => {
       // upsert membership — idempotent, safe to call twice
       await tx.workspaceMember.upsert({
         where:  { workspaceId_userId: { workspaceId: invite.workspaceId, userId } },
