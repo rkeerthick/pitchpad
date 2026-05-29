@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { db } from '@/lib/db'
 import { getCurrentUserId, handleAuthError } from '@/lib/auth/workspace'
 
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
     // Short random suffix guarantees uniqueness without a DB read
     const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`
 
-    const workspace = await db.$transaction(async (tx) => {
+    const workspace = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       const ws = await tx.workspace.create({
         data: { name: body.name!.trim(), slug },
       })

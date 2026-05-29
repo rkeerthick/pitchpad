@@ -23,6 +23,7 @@
 
 import { NextRequest } from 'next/server'
 import { Webhook } from 'svix'
+import { Prisma } from '@prisma/client'
 import { db } from '@/lib/db'
 
 // ── Clerk event types (minimal — only what we need) ───────────────────────────
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
       .slice(0, 24)
     const slug = `${baseSlug}-${id.slice(-6)}`
 
-    await db.$transaction(async (tx) => {
+    await db.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.user.upsert({
         where:  { id },
         create: { id, email, name, avatarUrl: image_url },

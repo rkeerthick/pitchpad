@@ -7,6 +7,7 @@
 
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { Prisma } from '@prisma/client'
 import { db } from '@/lib/db'
 
 export default async function RootPage() {
@@ -45,7 +46,7 @@ export default async function RootPage() {
     .slice(0, 24)
   const slug = `${baseSlug}-${userId.slice(-6)}`
 
-  await db.$transaction(async (tx) => {
+  await db.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.user.upsert({
       where:  { id: userId },
       create: { id: userId, email, name, avatarUrl: clerkUser.imageUrl },
