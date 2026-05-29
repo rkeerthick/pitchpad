@@ -1,0 +1,329 @@
+/* ── Axiom Design System — CSS Custom Properties ─────────────────────────────
+   Variables map 1:1 to src/lib/tokens.ts.  Use CSS vars for anything
+   that benefits from inheritance (text color, border color inside components)
+   and import the TS constants directly for values used in style props.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* ── Backgrounds ─────────────────────────────────────────────────────────── */
+  --bg-base:     #F3F4F6;
+  --bg-surface:  #FFFFFF;
+  --bg-panel:    #EAECF0;
+  --bg-elevated: #DDE0E7;
+
+  /* ── Borders ─────────────────────────────────────────────────────────────── */
+  --border:       #CDD0D8;
+  --border-strong:#9EA5B5;
+
+  /* ── Foreground ──────────────────────────────────────────────────────────── */
+  --fg-1: #111827;
+  --fg-2: #6B7280;
+  --fg-3: #9CA3AF;
+
+  /* ── Semantic accents ────────────────────────────────────────────────────── */
+  --accent:  #2563EB;
+  --ai:      #7C3AED;
+  --danger:  #DC2626;
+  --success: #059669;
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* ── Radii ───────────────────────────────────────────────────────────────── */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+
+  /* ── Motion ──────────────────────────────────────────────────────────────── */
+  --motion-fast:     80ms ease;
+  --motion-standard: 130ms ease;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px rgba(17,24,39,0.06);
+  --shadow-md:  0 4px 12px rgba(17,24,39,0.08);
+  --shadow-lg:  0 8px 24px rgba(17,24,39,0.10);
+}
+
+/* ── Base reset ──────────────────────────────────────────────────────────────── */
+
+html {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg-1);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--fg-1);
+}
+
+/* ── Tiptap / ProseMirror editor surface ─────────────────────────────────────
+   The writing surface uses slightly larger body text (15px) and a comfortable
+   1.7 line height for long-session reading.  Headings and paragraphs have
+   generous vertical rhythm — this is where the "calm and legible" principle
+   manifests.  The font stays Inter (not serif) per Axiom.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.tiptap {
+  outline: none;
+  min-height: 320px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--fg-1);
+}
+
+.tiptap p {
+  margin-bottom: 0.85em;
+}
+
+.tiptap p:last-child {
+  margin-bottom: 0;
+}
+
+.tiptap h1 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 1.5em 0 0.5em;
+  color: var(--fg-1);
+}
+
+.tiptap h2 {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 1.25em 0 0.4em;
+  color: var(--fg-1);
+}
+
+.tiptap h3 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.375;
+  margin: 1em 0 0.3em;
+  color: var(--fg-1);
+}
+
+.tiptap h1:first-child,
+.tiptap h2:first-child,
+.tiptap h3:first-child {
+  margin-top: 0;
+}
+
+.tiptap strong {
+  font-weight: 600;
+}
+
+.tiptap em {
+  font-style: italic;
+}
+
+.tiptap code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1px 5px;
+  color: var(--fg-1);
+}
+
+.tiptap pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+.tiptap pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid var(--border-strong);
+  margin: 1em 0;
+  padding: 2px 0 2px 16px;
+  color: var(--fg-2);
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.85em;
+}
+
+.tiptap li {
+  margin-bottom: 0.25em;
+}
+
+.tiptap hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+/* Placeholder text when editor is empty */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--fg-3);
+  font-style: normal;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* ── CollaborationCursor remote-user decorations ─────────────────────────────
+   The caret element is rendered inline by CollaborationCursor's `render` fn.
+   The selection highlight class is applied by the extension over the selected
+   text range.  We keep it translucent so the text remains readable.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.collaboration-cursor__selection {
+  opacity: 0.25;
+  border-radius: 1px;
+}
+
+/* ── Comment highlight ───────────────────────────────────────────────────────
+   Applied by commentDecorationPlugin.ts via Decoration.inline().
+   The per-comment color is set as an inline `style` attribute by the plugin
+   (background + border-bottom).  This class handles the structural bits.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.comment-highlight {
+  cursor: pointer;
+  border-radius: 1px;
+  transition: opacity var(--motion-fast);
+}
+
+.comment-highlight:hover {
+  opacity: 0.75;
+}
+
+/* ── AI suggestion marks ─────────────────────────────────────────────────────
+   Applied by AISuggestionExtension (Tiptap Mark).
+   Two visual states:
+     .ai-suggestion           → proposed addition (highlight + underline)
+     .ai-suggestion--deletion → proposed removal (strikethrough, danger tint)
+   The purple (#7C3AED) is distinct from the blue accent so AI edits are
+   immediately recognizable as non-human.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.ai-suggestion {
+  background: rgba(124,58,237,0.08);
+  border-bottom: 1.5px solid #7C3AED;
+  border-radius: 1px;
+  cursor: default;
+  transition: background var(--motion-fast);
+}
+
+.ai-suggestion:hover {
+  background: rgba(124,58,237,0.14);
+}
+
+.ai-suggestion--deletion {
+  background: rgba(220,38,38,0.07);
+  text-decoration: line-through;
+  text-decoration-color: #DC2626;
+  text-decoration-thickness: 1.5px;
+  color: var(--fg-2);
+}
+
+/* ── Formatting toolbar buttons ─────────────────────────────────────────────── */
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  transition: background var(--motion-fast), color var(--motion-fast);
+  flex-shrink: 0;
+}
+
+.toolbar-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--fg-1);
+}
+
+.toolbar-btn.is-active {
+  background: var(--bg-elevated);
+  color: var(--accent);
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────────── */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────────
+   Thin, unobtrusive scrollbars that match the panel color.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-3);
+}
+
+/* ── Focus ring ──────────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

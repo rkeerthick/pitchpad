@@ -1,0 +1,118 @@
+// prisma/schema.prisma
+//
+// Data model for PitchPad's auth + workspace layer.
+//
+// ── Relationships ─────────────────────────────────────────────────────────────
+//
+//   User ──< WorkspaceMember >── Workspace ──< Document
+//                                     │
+//                                     └──< WorkspaceInvite
+//
+// ── Security contract ────────────────────────────────────────────────────────
+//
+//   Every query that returns workspace-scoped data (documents, members, invites)
+//   MUST first pass lib/auth/workspace.ts requireWorkspaceAccess().
+//   The schema enforces referential integrity; the helper enforces authorization.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── User ─────────────────────────────────────────────────────────────────────
+// id mirrors the Clerk userId (e.g. "user_2abc...") — no separate UUID needed.
+// Synced via the /api/webhooks/clerk route on user.created / user.updated.
+
+model User {
+  id        String   @id          // Clerk userId
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  memberships WorkspaceMember[]
+  invitesSent WorkspaceInvite[]  @relation("InvitedBy")
+}
+
+// ── Workspace ─────────────────────────────────────────────────────────────────
+// slug is URL-safe, unique, auto-generated on create.
+// Personal workspaces are created automatically by the webhook on user.created.
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  members   WorkspaceMember[]
+  documents Document[]
+  invites   WorkspaceInvite[]
+}
+
+// ── WorkspaceMember ───────────────────────────────────────────────────────────
+// @@unique([workspaceId, userId]) prevents duplicate memberships.
+// Role hierarchy (enforced in code): OWNER > ADMIN > MEMBER
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        Role     @default(MEMBER)
+  joinedAt    DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// ── Document ──────────────────────────────────────────────────────────────────
+// Stores metadata only. Content lives in Yjs / the y-websocket collab server.
+// The Yjs room name stays "pitchpad-doc-{id}" — id is the cuid from this table.
+
+model Document {
+  id          String   @id @default(cuid())
+  workspaceId String
+  title       String   @default("Untitled Proposal")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+// ── WorkspaceInvite ───────────────────────────────────────────────────────────
+// Token is a secure random cuid, sent in the invite email URL.
+// @@unique([workspaceId, email]) prevents double-inviting the same address.
+// Upsert on re-invite refreshes the expiry and resets acceptedAt.
+
+model WorkspaceInvite {
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String
+  role        Role      @default(MEMBER)
+  token       String    @unique @default(cuid())
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  invitedById String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User      @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  @@unique([workspaceId, email])
+  @@index([token])
+}
