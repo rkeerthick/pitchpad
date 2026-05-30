@@ -7,6 +7,6 @@ const DocEditorClient = dynamic(
   { ssr: false, loading: () => null }
 )
 
-export default function DocEditorLoader({ docId }: { docId: string }) {
-  return <DocEditorClient docId={docId} />
+export default function DocEditorLoader({ docId, initialTitle }: { docId: string; initialTitle?: string }) {
+  return <DocEditorClient docId={docId} initialTitle={initialTitle} />
 }

@@ -22,6 +22,7 @@
 
 import { requireDocumentAccess, ForbiddenError } from '@/lib/auth/workspace'
 import { notFound } from 'next/navigation'
+import { db } from '@/lib/db'
 import DocEditorLoader from './DocEditorLoader'
 
 export default async function DocPage({
@@ -34,12 +35,14 @@ export default async function DocPage({
   try {
     await requireDocumentAccess(id)
   } catch (err) {
-    if (err instanceof ForbiddenError) {
-      // Don't distinguish "document doesn't exist" from "you can't see it"
-      notFound()
-    }
+    if (err instanceof ForbiddenError) notFound()
     throw err
   }
 
-  return <DocEditorLoader docId={id} />
+  const doc = await db.document.findUnique({
+    where:  { id },
+    select: { title: true },
+  })
+
+  return <DocEditorLoader docId={id} initialTitle={doc?.title ?? 'Untitled Proposal'} />
 }

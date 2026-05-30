@@ -66,7 +66,13 @@ function getInstance(docId: string) {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export default function DocEditorClient({ docId }: { docId: string }) {
+export default function DocEditorClient({
+  docId,
+  initialTitle = 'Untitled Proposal',
+}: {
+  docId: string
+  initialTitle?: string
+}) {
   const { ydoc, provider } = getInstance(docId)
 
   const fragment  = useMemo(() => ydoc.getXmlFragment('default'), [ydoc])
@@ -100,8 +106,22 @@ export default function DocEditorClient({ docId }: { docId: string }) {
   const [activeSuggestionId, setActiveSuggestionId] = useState<string | null>(null)
   const [aiError, setAiError]                       = useState<string | null>(null)
 
-  const [docTitle, setDocTitle]   = useState('Untitled Proposal')
+  const [docTitle, setDocTitle]   = useState(initialTitle)
   const [docStatus]               = useState<ProposalStatus>('draft')
+
+  // Save title to DB with 800ms debounce — avoids a request on every keystroke
+  const titleSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const handleTitleChange = useCallback((title: string) => {
+    setDocTitle(title)
+    if (titleSaveTimer.current) clearTimeout(titleSaveTimer.current)
+    titleSaveTimer.current = setTimeout(() => {
+      fetch(`/api/documents/${docId}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ title }),
+      }).catch(console.error)
+    }, 800)
+  }, [docId])
 
   // ── Tiptap editor ──────────────────────────────────────────────────────────
   const editor = useEditor({
@@ -252,7 +272,7 @@ export default function DocEditorClient({ docId }: { docId: string }) {
           />
         }
         toolbar={<FormatToolbar editor={editor} />}
-        onTitleChange={setDocTitle}
+        onTitleChange={handleTitleChange}
       >
         <EditorContent editor={editor} />
       </DocumentEditor>
