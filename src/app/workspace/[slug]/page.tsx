@@ -8,6 +8,7 @@
 // layout already ran, but protects against direct page access without layout.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import Link from 'next/link'
 import { requireWorkspaceSlugAccess } from '@/lib/auth/workspace'
 import { db } from '@/lib/db'
 import { ForbiddenError } from '@/lib/auth/workspace'
