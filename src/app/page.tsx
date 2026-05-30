@@ -46,6 +46,11 @@ export default async function RootPage() {
     .slice(0, 24)
   const slug = `${baseSlug}-${userId.slice(-6)}`
 
+  // Track whether provisioning happened — redirect() must be called OUTSIDE
+  // the transaction because Next.js redirect() throws a special error that
+  // causes Prisma to roll back the transaction before the data is committed.
+  let provisionedSlug: string | null = null
+
   await db.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.user.upsert({
       where:  { id: userId },
@@ -62,10 +67,10 @@ export default async function RootPage() {
       await tx.workspaceMember.create({
         data: { workspaceId: workspace.id, userId, role: 'OWNER' },
       })
-      redirect(`/workspace/${slug}`)
+      provisionedSlug = slug
     }
   })
 
-  // If we reach here the transaction created the workspace — redirect ran inside
-  redirect('/')
+  // Redirect only after the transaction has fully committed
+  redirect(`/workspace/${provisionedSlug ?? slug}`)
 }
