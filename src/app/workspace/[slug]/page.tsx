@@ -8,6 +8,9 @@
 // layout already ran, but protects against direct page access without layout.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Never serve a cached version — document titles must always be fresh
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { requireWorkspaceSlugAccess } from '@/lib/auth/workspace'
 import { db } from '@/lib/db'
@@ -15,6 +18,7 @@ import { ForbiddenError } from '@/lib/auth/workspace'
 import { notFound } from 'next/navigation'
 import { NewDocumentButton } from '@/components/workspace/NewDocumentButton'
 import { DocCard } from './DocCard'
+import { Refresher } from './Refresher'
 import { colors, fonts, fontSize, space } from '@/lib/tokens'
 
 export default async function WorkspacePage({
@@ -48,6 +52,7 @@ export default async function WorkspacePage({
         padding: `${space[10]}px ${space[6]}px`,
       }}
     >
+      <Refresher />
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div
         style={{
