@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireDocumentAccess, handleAuthError } from '@/lib/auth/workspace'
 
@@ -23,12 +24,20 @@ export async function PATCH(
     }
 
     const doc = await db.document.update({
-      where: { id },
-      data:  { title: body.title.trim() || 'Untitled Proposal' },
-      select: { id: true, title: true },
+      where:  { id },
+      data:   { title: body.title.trim() || 'Untitled Proposal' },
+      select: {
+        id:    true,
+        title: true,
+        workspace: { select: { slug: true } },
+      },
     })
 
-    return Response.json(doc)
+    // Bust the workspace listing page cache so the updated title
+    // shows immediately when the user navigates back.
+    revalidatePath(`/workspace/${doc.workspace.slug}`)
+
+    return Response.json({ id: doc.id, title: doc.title })
   } catch (err) {
     return handleAuthError(err)
   }
